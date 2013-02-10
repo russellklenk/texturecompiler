@@ -1,0 +1,50 @@
+{
+  "name"         : "texturecompiler",
+  "noAnalyze"    : false,
+  "preferGlobal" : false,
+  "main"         : "index.js",
+  "version"      : "1.0.0",
+  "license"      : "Public Domain",
+  "author"       : "Russell Klenk <contact@russellklenk.com>",
+  "description"  : "Texture data compiler for content.js",
+  "homepage"     : "https://github.com/russellklenk/texturecompiler",
+  "bugs"         : "https://github.com/russellklenk/texturecompiler/issues",
+  "contributors" : [
+    {
+      "name"  : "Russell Klenk",
+      "email" : "contact@russellklenk.com"
+    }
+  ],
+  "repository" : {
+    "type"     : "git",
+    "url"      : "https://github.com/russellklenk/texturecompiler.git"
+  },
+  "bin" : {
+    "texc"    : "./bin/texture.js"
+  },
+  "scripts" : {
+  },
+  "keywords" : [
+    "image",
+    "texture",
+    "webgl",
+    "opengl",
+    "opengles",
+    "conversion",
+    "tool",
+    "game",
+    "graphics"
+  ],
+  "dependencies" : {
+    "commander" : ">=1.0.x",
+    "datacompiler" : ">=1.0.0"
+  },
+  "devDependencies" : {
+  },
+  "bundleDependencies" : [
+  ],
+  "engine"  : {
+    "node"  : ">=0.8",
+    "npm"   : ">=1.1.36"
+  }
+}
