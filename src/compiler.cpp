@@ -24,12 +24,14 @@
 
 /*/////////////////////////////////////////////////////////////////////////80*/
 
+#if 0
 static void dump_data(char const *path, void const *data, size_t size)
 {
     FILE  *fp = fopen(path, "wb");
     fwrite(data, size, 1, fp);
     fclose(fp);
 }
+#endif
 
 /*/////////////////////////////////////////////////////////////////////////80*/
 

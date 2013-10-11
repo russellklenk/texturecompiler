@@ -1234,7 +1234,6 @@ void image::compute_polyphase_matrix_1d(
     size_t columns    = kernel_weights->column_count;
     for (size_t  i    = 0; i < columns; ++i)
     {
-        float  inv_t  =  0.0f;
         float  total  =  0.0f;
         float  center = (0.5f + i) * scale_inv;
         size_t left   = (size_t)     floorf(center - width);
@@ -1250,7 +1249,6 @@ void image::compute_polyphase_matrix_1d(
             weights[index] = weight;
             total         += weight;
         }
-        inv_t = 1.0f / total; // normalize
         for (size_t j = 0; j < window; ++j) weights[(i * window) + j] /= total;
     }
 }
