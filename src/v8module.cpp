@@ -386,21 +386,21 @@ static void* level_descriptor(
     level_byte_size(format, width, height, out_bpp, out_size);
     switch (format)
     {
-        case TEXTURE_FORMAT_565_I:      return buffer_to_pixels_16i_565(level);
-        case TEXTURE_FORMAT_5551_I:     return buffer_to_pixels_16i_5551(level);
-        case TEXTURE_FORMAT_4444_I:     return buffer_to_pixels_16i_4444(level);
-        case TEXTURE_FORMAT_8_I:        return buffer_to_pixels_32i(level);
-        case TEXTURE_FORMAT_88_I:       return buffer_to_pixels_32i(level);
-        case TEXTURE_FORMAT_888_I:      return buffer_to_pixels_32i(level);
-        case TEXTURE_FORMAT_8888_I:     return buffer_to_pixels_32i(level);
-        case TEXTURE_FORMAT_16_F:       return buffer_to_pixels_64f(level);
-        case TEXTURE_FORMAT_1616_F:     return buffer_to_pixels_64f(level);
-        case TEXTURE_FORMAT_161616_F:   return buffer_to_pixels_64f(level);
-        case TEXTURE_FORMAT_16161616_F: return buffer_to_pixels_64f(level);
-        case TEXTURE_FORMAT_32_F:       return buffer_to_pixels_128f(level);
-        case TEXTURE_FORMAT_3232_F:     return buffer_to_pixels_128f(level);
-        case TEXTURE_FORMAT_323232_F:   return buffer_to_pixels_128f(level);
-        case TEXTURE_FORMAT_32323232_F: return buffer_to_pixels_128f(level);
+        case TEXTURE_FORMAT_565_I:      return buffer_to_pixels_packed_565 (level);
+        case TEXTURE_FORMAT_5551_I:     return buffer_to_pixels_packed_5551(level);
+        case TEXTURE_FORMAT_4444_I:     return buffer_to_pixels_packed_4444(level);
+        case TEXTURE_FORMAT_8_I:        return buffer_to_pixels_8i (level, 1);
+        case TEXTURE_FORMAT_88_I:       return buffer_to_pixels_8i (level, 2);
+        case TEXTURE_FORMAT_888_I:      return buffer_to_pixels_8i (level, 3);
+        case TEXTURE_FORMAT_8888_I:     return buffer_to_pixels_8i (level, 4);
+        case TEXTURE_FORMAT_16_F:       return buffer_to_pixels_16f(level, 1);
+        case TEXTURE_FORMAT_1616_F:     return buffer_to_pixels_16f(level, 2);
+        case TEXTURE_FORMAT_161616_F:   return buffer_to_pixels_16f(level, 3);
+        case TEXTURE_FORMAT_16161616_F: return buffer_to_pixels_16f(level, 4);
+        case TEXTURE_FORMAT_32_F:       return buffer_to_pixels_32f(level, 1);
+        case TEXTURE_FORMAT_3232_F:     return buffer_to_pixels_32f(level, 2);
+        case TEXTURE_FORMAT_323232_F:   return buffer_to_pixels_32f(level, 3);
+        case TEXTURE_FORMAT_32323232_F: return buffer_to_pixels_32f(level, 4);
         default:                        break;
     }
     return NULL;
@@ -446,26 +446,38 @@ static char* v8_string_to_utf8(v8::Local<v8::Value> v)
 
 static v8::Handle<v8::Value> gl_format_v8(
     char const *type,
-    size_t      channel_count)
+    int32_t     format)
 {
     v8::HandleScope scope;
-    switch (channel_count)
+    switch (format)
     {
-        case 1:
+        case TEXTURE_FORMAT_8_I:
+        case TEXTURE_FORMAT_16_F:
+        case TEXTURE_FORMAT_32_F:
             if (!strcmp("ALPHA", type))
                 return scope.Close(v8::String::New("ALPHA"));
             else
                 return scope.Close(v8::String::New("LUMINANCE"));
-        case 2:
+        case TEXTURE_FORMAT_88_I:
+        case TEXTURE_FORMAT_1616_F:
+        case TEXTURE_FORMAT_3232_F:
             return scope.Close(v8::String::New("LUMINANCE_ALPHA"));
-        case 3:
+        case TEXTURE_FORMAT_565_I:
+        case TEXTURE_FORMAT_888_I:
+        case TEXTURE_FORMAT_161616_F:
+        case TEXTURE_FORMAT_323232_F:
             return scope.Close(v8::String::New("RGB"));
-        case 4:
+        case TEXTURE_FORMAT_5551_I:
+        case TEXTURE_FORMAT_4444_I:
+        case TEXTURE_FORMAT_8888_I:
+        case TEXTURE_FORMAT_16161616_F:
+        case TEXTURE_FORMAT_32323232_F:
+            return scope.Close(v8::String::New("RGBA"));
             return scope.Close(v8::String::New("RGBA"));
         default:
             break;
     }
-    return scope.Close(ex("Invalid channel count in gl_format_v8."));
+    return scope.Close(ex("Invalid format in gl_format_v8."));
 }
 
 /*/////////////////////////////////////////////////////////////////////////80*/
@@ -498,13 +510,10 @@ static v8::Handle<v8::Value> gl_target_v8(char const *target)
 
 /*/////////////////////////////////////////////////////////////////////////80*/
 
-static v8::Handle<v8::Value> gl_data_type_v8(
-    char const *format,
-    size_t      channel_count)
+static v8::Handle<v8::Value> gl_data_type_v8(int32_t format)
 {
-    v8::HandleScope     scope;
-    int32_t format_id = texture_format(format, channel_count);
-    switch (format_id)
+    v8::HandleScope scope;
+    switch (format)
     {
         case TEXTURE_FORMAT_565_I:
             return scope.Close(v8::String::New("UNSIGNED_SHORT_5_6_5"));
@@ -767,13 +776,15 @@ static v8::Handle<v8::Value> v8_output_raw(
         }
 
         // build an object describing the miplevel.
-        desc->Set(prop_width,      v8::Integer::NewFromUnsigned(width));
-        desc->Set(prop_height,     v8::Integer::NewFromUnsigned(height));
-        desc->Set(prop_byteOffset, v8::Integer::NewFromUnsigned(byte_offset));
-        desc->Set(prop_byteSize,   v8::Integer::NewFromUnsigned(byte_size));
+        // not happy about having to force byte_offset and byte_size
+        // to 32-bit, but don't think it will be an issue in practice.
+        desc->Set(prop_width,      v8::Integer::NewFromUnsigned((uint32_t) width));
+        desc->Set(prop_height,     v8::Integer::NewFromUnsigned((uint32_t) height));
+        desc->Set(prop_byteOffset, v8::Integer::NewFromUnsigned((uint32_t) byte_offset));
+        desc->Set(prop_byteSize,   v8::Integer::NewFromUnsigned((uint32_t) byte_size));
 
         // add it to the back of the descriptor array.
-        levels->Set(i, desc);
+        levels->Set((uint32_t)  i, desc);
 
         // update the byte offset for the next level.
         byte_offset += byte_size;
@@ -807,10 +818,11 @@ static v8::Handle<v8::Object> output_to_v8_object(
     char const *target_string    = args->texture_target;
     size_t      channels         = output->channel_count;
     bool        mipmaps          = output->level_count > 1;
+    int32_t     format           = texture_format(format_string, channels);
     metadata->Set(prop_type,       v8::String::New(args->texture_type));
     metadata->Set(prop_target,     gl_target_v8(target_string));
-    metadata->Set(prop_format,     gl_format_v8(type_string, channels));
-    metadata->Set(prop_dataType,   gl_data_type_v8(format_string, channels));
+    metadata->Set(prop_format,     gl_format_v8(type_string, format));
+    metadata->Set(prop_dataType,   gl_data_type_v8(format));
     metadata->Set(prop_wrapS,      v8::String::New(args->wrap_mode_s));
     metadata->Set(prop_wrapT,      v8::String::New(args->wrap_mode_t));
     metadata->Set(prop_magFilter,  v8::String::New(args->magnify_filter));
@@ -879,11 +891,11 @@ v8::Handle<v8::Value> Compile(v8::Arguments const &args)
     }
 
     // write the raw texture data.
-    size_t                 nlevels  = tcinp.maximum_levels;
-    size_t                 channels = image.channel_count;
+    size_t                 nlevels  = tcout.level_count;
+    size_t                 channels = tcout.channel_count;
     int32_t                format   = texture_format(tcarg.target_format, channels);
     char const            *target   = tcarg.target_path;
-    v8::Handle<v8::Array>  levels   = v8::Array::New(nlevels);
+    v8::Handle<v8::Array>  levels   = v8::Array::New((int) nlevels);
     v8::Handle<v8::Value>  r3       = v8_output_raw(target, format, levels, &tcout);
     if (!r3->IsUndefined())
     {

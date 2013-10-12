@@ -757,10 +757,10 @@ stbi_inline static uint8 get8u(stbi *s)
 static void skip(stbi *s, int n)
 {
    if (s->io.read) {
-      int blen = s->img_buffer_end - s->img_buffer;
+      ptrdiff_t blen = s->img_buffer_end - s->img_buffer;
       if (blen < n) {
          s->img_buffer = s->img_buffer_end;
-         (s->io.skip)(s->io_user_data, n - blen);
+         (s->io.skip)(s->io_user_data, (int) (n - blen));
          return;
       }
    }
@@ -770,13 +770,13 @@ static void skip(stbi *s, int n)
 static int getn(stbi *s, stbi_uc *buffer, int n)
 {
    if (s->io.read) {
-      int blen = s->img_buffer_end - s->img_buffer;
+      ptrdiff_t blen = s->img_buffer_end - s->img_buffer;
       if (blen < n) {
          int res, count;
 
          memcpy(buffer, s->img_buffer, blen);
 
-         count = (s->io.read)(s->io_user_data, (char*) buffer + blen, n - blen);
+         count = (s->io.read)(s->io_user_data, (char*) buffer + blen, (int)(n - blen));
          res = (count == (n-blen));
          s->img_buffer = s->img_buffer_end;
          return res;

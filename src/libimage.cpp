@@ -70,7 +70,7 @@ static const float Sobel_9x9[] =
 
 /*/////////////////////////////////////////////////////////////////////////80*/
 
-static inline int32_t repeat_remainder(int32_t a, size_t b)
+static inline ptrdiff_t repeat_remainder(int32_t a, size_t b)
 {
     if (a >= 0) return (a % b);
     return (a + 1) % b + b - 1;
@@ -415,7 +415,7 @@ size_t image::miplevel_count(
 
 size_t image::miplevel_width(size_t level0_width, size_t level_index)
 {
-    int level_width = level0_width >> level_index;
+    size_t level_width = level0_width >> level_index;
     return  (0 == level_width) ? 1  : level_width;
 }
 
@@ -423,7 +423,7 @@ size_t image::miplevel_width(size_t level0_width, size_t level_index)
 
 size_t image::miplevel_height(size_t level0_height, size_t level_index)
 {
-    int level_height = level0_height >> level_index;
+    size_t level_height = level0_height >> level_index;
     return  (0 == level_height)  ? 1  : level_height;
 }
 
@@ -431,7 +431,7 @@ size_t image::miplevel_height(size_t level0_height, size_t level_index)
 
 size_t image::miplevel_slices(size_t level0_slices, size_t level_index)
 {
-    int level_slices  = level0_slices >> level_index;
+    size_t level_slices = level0_slices >> level_index;
     return (0 == level_slices)    ? 1  : level_slices;
 }
 
@@ -1421,8 +1421,8 @@ void image::cmyk_to_rgb(
 
 size_t image::index_wrap(size_t width, size_t height, ptrdiff_t x, ptrdiff_t y)
 {
-    y = repeat_remainder(y, height);
-    x = repeat_remainder(x, width);
+    y = repeat_remainder((int) y, height);
+    x = repeat_remainder((int) x, width);
     return (y * width) + x;
 }
 

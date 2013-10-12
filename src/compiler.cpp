@@ -212,7 +212,7 @@ static void init_buffer_from_uint8(image::buffer_t *buffer, uint8_t *pixels)
 
 /*/////////////////////////////////////////////////////////////////////////80*/
 
-void* buffer_to_pixels_1_32(image::buffer_t *buffer)
+void* buffer_to_pixels_1_8i(image::buffer_t *buffer)
 {
     size_t   bpp     = sizeof(uint8_t) *1;
     size_t   width   = buffer->channel_width;
@@ -229,7 +229,7 @@ void* buffer_to_pixels_1_32(image::buffer_t *buffer)
 
 /*/////////////////////////////////////////////////////////////////////////80*/
 
-void* buffer_to_pixels_2_32(image::buffer_t *buffer)
+void* buffer_to_pixels_2_8i(image::buffer_t *buffer)
 {
     size_t   bpp     = sizeof(uint8_t) *2;
     size_t   width   = buffer->channel_width;
@@ -248,7 +248,7 @@ void* buffer_to_pixels_2_32(image::buffer_t *buffer)
 
 /*/////////////////////////////////////////////////////////////////////////80*/
 
-void* buffer_to_pixels_3_32(image::buffer_t *buffer)
+void* buffer_to_pixels_3_8i(image::buffer_t *buffer)
 {
     size_t   bpp     = sizeof(uint8_t) *3;
     size_t   width   = buffer->channel_width;
@@ -269,7 +269,7 @@ void* buffer_to_pixels_3_32(image::buffer_t *buffer)
 
 /*/////////////////////////////////////////////////////////////////////////80*/
 
-void* buffer_to_pixels_4_32(image::buffer_t *buffer)
+void* buffer_to_pixels_4_8i(image::buffer_t *buffer)
 {
     size_t   bpp     = sizeof(uint8_t) *4;
     size_t   width   = buffer->channel_width;
@@ -314,7 +314,7 @@ uint16_t float_to_half(float *f)
         else mantissa  = 0;
         return (((uint16_t) sign) << 15)         |
                 ((uint16_t) HALF_MAX_BIASED_EXP) |
-                ((uint16_t) mantissa >> 16);
+                ((uint16_t)(mantissa >> 16));
     }
     else if (exponent <= HALF_MIN_BIASED_EXP_AS_SINGLE_EXP) // denormal or zero
     {
@@ -933,7 +933,7 @@ bool compile_texture(
 #define MAKE_RGB565(r, g, b) \
     ((uint16_t) ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3))
 
-void* buffer_to_pixels_16i_565(image::buffer_t *buffer)
+void* buffer_to_pixels_packed_565(image::buffer_t *buffer)
 {
     if (buffer->channel_count < 3)
         return NULL;
@@ -961,7 +961,7 @@ void* buffer_to_pixels_16i_565(image::buffer_t *buffer)
 #define MAKE_RGB4444(r, g, b, a) \
     ((uint16_t) ((r >> 4) << 12) | ((g >> 4) << 8) | ((b >> 4) << 4) | ((a >> 4)))
 
-void* buffer_to_pixels_16i_4444(image::buffer_t *buffer)
+void* buffer_to_pixels_packed_4444(image::buffer_t *buffer)
 {
     if (buffer->channel_count < 4)
         return NULL;
@@ -991,7 +991,7 @@ void* buffer_to_pixels_16i_4444(image::buffer_t *buffer)
 #define MAKE_RGB5551(r, g, b, a) \
     ((uint16_t) ((r >> 3) << 11) | ((g >> 3) << 6) | ((b >> 3) << 1) | ((a >> 7)))
 
-void* buffer_to_pixels_16i_5551(image::buffer_t *buffer)
+void* buffer_to_pixels_packed_5551(image::buffer_t *buffer)
 {
     if (buffer->channel_count < 4)
         return NULL;
@@ -1018,14 +1018,14 @@ void* buffer_to_pixels_16i_5551(image::buffer_t *buffer)
 
 /*/////////////////////////////////////////////////////////////////////////80*/
 
-void* buffer_to_pixels_32i(image::buffer_t *buffer)
+void* buffer_to_pixels_8i(image::buffer_t *buffer, size_t channel_count)
 {
-    switch (buffer->channel_count)
+    switch (channel_count)
     {
-        case 1:  return buffer_to_pixels_1_32(buffer);
-        case 2:  return buffer_to_pixels_2_32(buffer);
-        case 3:  return buffer_to_pixels_3_32(buffer);
-        case 4:  return buffer_to_pixels_4_32(buffer);
+        case 1:  return buffer_to_pixels_1_8i(buffer);
+        case 2:  return buffer_to_pixels_2_8i(buffer);
+        case 3:  return buffer_to_pixels_3_8i(buffer);
+        case 4:  return buffer_to_pixels_4_8i(buffer);
         default: break;
     }
     return NULL;
@@ -1033,9 +1033,9 @@ void* buffer_to_pixels_32i(image::buffer_t *buffer)
 
 /*/////////////////////////////////////////////////////////////////////////80*/
 
-void* buffer_to_pixels_64f(image::buffer_t *buffer)
+void* buffer_to_pixels_16f(image::buffer_t *buffer, size_t channel_count)
 {
-    switch (buffer->channel_count)
+    switch (channel_count)
     {
         case 1:  return buffer_to_pixels_1_16f(buffer);
         case 2:  return buffer_to_pixels_2_16f(buffer);
@@ -1048,9 +1048,9 @@ void* buffer_to_pixels_64f(image::buffer_t *buffer)
 
 /*/////////////////////////////////////////////////////////////////////////80*/
 
-void* buffer_to_pixels_128f(image::buffer_t *buffer)
+void* buffer_to_pixels_32f(image::buffer_t *buffer, size_t channel_count)
 {
-    switch (buffer->channel_count)
+    switch (channel_count)
     {
         case 1:  return buffer_to_pixels_1_32f(buffer);
         case 2:  return buffer_to_pixels_2_32f(buffer);

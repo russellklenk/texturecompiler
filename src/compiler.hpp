@@ -181,37 +181,46 @@ CMN_PUBLIC bool  compile_texture(
 /// integer data.
 /// @param buffer The buffer to convert. The buffer must have three channels.
 /// @return A pointer to the interleaved pixel data.
-CMN_PUBLIC void* buffer_to_pixels_16i_565(image::buffer_t *buffer);
+CMN_PUBLIC void* buffer_to_pixels_packed_565(image::buffer_t *buffer);
 
 /// Converts an RGBA image buffer to a pixel array of 16 bits-per-pixel
 /// unsigned integer data.
 /// @param buffer The buffer to convert. The buffer must have four channels.
 /// @return A pointer to the interleaved pixel data.
-CMN_PUBLIC void* buffer_to_pixels_16i_4444(image::buffer_t *buffer);
+CMN_PUBLIC void* buffer_to_pixels_packed_4444(image::buffer_t *buffer);
 
 /// Converts an RGBA image buffer to a pixel array of 16 bits-per-pixel
 /// unsigned integer data.
 /// @param buffer The buffer to convert. The buffer must have four channels.
 /// @return A pointer to the interleaved pixel data.
-CMN_PUBLIC void* buffer_to_pixels_16i_5551(image::buffer_t *buffer);
+CMN_PUBLIC void* buffer_to_pixels_packed_5551(image::buffer_t *buffer);
 
 /// Converts an image buffer to a pixel array of 8 bits-per-channel unsigned
 /// integer data.
 /// @param buffer The buffer to convert.
+/// @param channel_count The number of channels to read from @a buffer.
 /// @return A pointer to the interleaved pixel data.
-CMN_PUBLIC void* buffer_to_pixels_32i(image::buffer_t *buffer);
+CMN_PUBLIC void* buffer_to_pixels_8i(
+    image::buffer_t *buffer,
+    size_t           channel_count);
 
 /// Converts an image buffer to a pixel array of 16 bits-per-channel half-
 /// precision floating point data.
 /// @param buffer The buffer to convert.
+/// @param channel_count The number of channels to read from @a buffer.
 /// @return A pointer to the interleaved pixel data.
-CMN_PUBLIC void* buffer_to_pixels_64f(image::buffer_t *buffer);
+CMN_PUBLIC void* buffer_to_pixels_16f(
+    image::buffer_t *buffer,
+    size_t           channel_count);
 
 /// Converts an image buffer to a pixel array of 32 bits-per-channel single-
 /// precision floating point data.
 /// @param buffer The buffer to convert.
+/// @param channel_count The number of channels to read from @a buffer.
 /// @return A pointer to the interleaved pixel data.
-CMN_PUBLIC void* buffer_to_pixels_128f(image::buffer_t *buffer);
+CMN_PUBLIC void* buffer_to_pixels_32f(
+    image::buffer_t *buffer,
+    size_t           channel_count);
 
 /// Releases the memory allocated for a buffer.
 /// @param buffer Pointer to the buffer to be freed.
